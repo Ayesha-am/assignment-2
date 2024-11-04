@@ -1,0 +1,289 @@
+from datetime import date
+
+class EBook:
+    """A class that identifies an EBook with title, author, publication date, genre, and price."""
+
+    def __init__(self, title: str, author: str, publication_date: str, genre: str, price: float):
+        self.__title = title                  # Private attribute for the title of the eBook
+        self.__author = author                # Private attribute for the author of the eBook
+        self.__publication_date = publication_date  # Publication date
+        self.__genre = genre                  # Genre of the eBook
+        self.__price = price                  # Private attribute for the price of the eBook
+
+    # Getters and Setters
+    def get_title(self):
+        return self.__title
+
+    def set_title(self, title):
+        self.__title = title
+
+    def get_author(self):
+        return self.__author
+
+    def get_price(self):
+        return self.__price
+
+    def set_price(self, price):
+        if price < 0:
+            raise ValueError("Price cannot be negative!")
+        self.__price = price
+
+    def get_publication_date(self):
+        return self.__publication_date
+
+    def get_genre(self):
+        return self.__genre
+
+    def __str__(self):
+        # Return a string representation of the eBook with its details.
+        return (f"EBook: {self.__title} by {self.__author}, "
+                f"Genre: {self.__genre}, Published: {self.__publication_date}, Price: {self.__price}")
+
+
+class Account:
+    """A class that identifies an Account with an account ID, username, and password."""
+
+    def __init__(self, accountID: str, username: str, password: str):
+        self.__accountID = accountID       # Private attribute for the unique account ID
+        self.__username = username         # Private attribute for the account's username
+        self.__password = password         # Private attribute for the account's password
+
+    # Getters and Setters
+    def get_accountID(self):
+        return self.__accountID
+
+    def set_accountID(self, accountID: str):
+        self.__accountID = accountID
+
+    def get_username(self):
+        return self.__username
+
+    def set_username(self, username):
+        self.__username = username
+
+    def get_password(self):
+        return self.__password
+
+    def set_password(self, password):
+        self.__password = password
+
+    def __str__(self):
+        # Return a string representation of the account with its ID and username.
+        return f"Account ID: {self.__accountID}, Username: {self.__username}"
+
+
+class Customer:
+    """A class that identifies a Customer with ID, name, email, phone number, and associated account and membership information."""
+
+    def __init__(self, customerID: str, name: str, email: str, phone: str, account: Account, membership: 'Membership'):
+        self.__customerID = customerID     # Private attribute for the unique customer ID
+        self.__name = name                 # Private attribute for the customer's name
+        self.__email = email               # Private attribute for the customer's email address
+        self.__phone = phone               # Private attribute for the customer's phone number
+        self._account = account            # Association with Account
+        self._membership = membership      # Protected attribute for the associated Membership object
+
+    # Getters and Setters
+    def get_customerID(self):
+        return self.__customerID
+
+    def set_customerID(self, customerID: str):
+        self.__customerID = customerID
+
+    def get_name(self):
+        return self.__name
+
+    def set_name(self, name):
+        self.__name = name
+
+    def get_email(self):
+        return self.__email
+
+    def set_email(self, email):
+        self.__email = email
+
+    def get_phone(self):
+        return self.__phone
+
+    def set_phone(self, phone):
+        self.__phone = phone
+
+    def get_account(self):
+        return self._account
+
+    def get_membership(self):
+        return self._membership
+
+    def __str__(self):
+        # Return a string representation of the customer with their details and associated account and membership.
+        return (f"Customer ID: {self.__customerID}, Name: {self.__name}, Email: {self.__email}, "
+                f"Phone: {self.__phone}, Account: [{self._account}], Membership: {self._membership}")
+
+
+class Cart:
+    """A class that identifies a Cart with a cart ID, items, and total price."""
+
+    def __init__(self, cartID: str):
+        self.__cartID = cartID           # Private attribute for the unique cart ID
+        self._items = {}                 # Dictionary for eBooks with quantities
+        self._totalPrice = 0.0           # Protected attribute for the total price of items in the cart
+    # Association with EBook: Each EBook can be associated with multiple Cart instances.
+
+    # Getters and Setters
+    def get_cartID(self):
+        return self.__cartID
+
+    def set_cartID(self, cartID: str):
+        self.__cartID = cartID
+
+    def add_item(self, ebook: EBook, quantity=1):
+        # Add an eBook to the cart or increase its quantity if it already exists.
+        if ebook in self._items:
+            self._items[ebook] += quantity  # Increase the quantity of the existing eBook.
+        else:
+            self._items[ebook] = quantity  # Add new eBook to the cart with the specified quantity.
+        self._totalPrice += ebook.get_price() * quantity  # Update the total price.
+
+    def remove_item(self, ebook: EBook):
+        # Remove an eBook from the cart if it exists.
+        if ebook in self._items:
+            self._totalPrice -= ebook.get_price() * self._items[ebook]  # Decrease total price by the item's cost.
+            del self._items[ebook]  # Remove the eBook from the cart.
+
+    def update_quantity(self, ebook: EBook, quantity: int):
+        # Update the quantity of an existing eBook in the cart.
+        if ebook in self._items:
+            self._totalPrice -= ebook.get_price() * self._items[ebook]  # Adjust total price for the old quantity.
+            self._items[ebook] = quantity  # Set the eBook's quantity to the new value.
+            self._totalPrice += ebook.get_price() * quantity  # Update the total price with the new quantity.
+
+    def get_total_price(self):
+        return self._totalPrice
+
+    def get_items(self):
+        return self._items
+
+    def __str__(self):
+        # Create a string representation of the cart, including its ID, items, and total price.
+        items = ", ".join(map(lambda x: f"{str(x[0])} x {x[1]}", self._items.items()))
+        return f"Cart ID: {self.__cartID}, Items: {items}, Total Price: {self._totalPrice}"
+
+class Discount:
+    """A class that represents a discount with a type and value."""
+
+    def __init__(self, discount_type: str, value: float):
+        self.__discount_type = discount_type  # Type of discount (e.g., 'bulk', 'loyalty')
+        self.__value = value                  # Value of the discount (percentage or fixed amount)
+
+    def get_discount_type(self):
+        """Return the type of the discount."""
+        return self.__discount_type
+
+    def get_value(self):
+        """Return the value of the discount."""
+        return self.__value
+
+    def apply_discount(self, total_amount: float) -> float:
+        """Applies the discount to a total amount and returns the discounted amount."""
+        if self.__discount_type == 'percentage':
+            # Calculate discount as a percentage of the total amount.
+            return total_amount * (1 - self.__value / 100)
+        elif self.__discount_type == 'fixed':
+            # Subtract a fixed amount from the total amount.
+            return total_amount - self.__value
+        return total_amount  # Return the original total amount if no valid discount type.
+
+    def __str__(self):
+        """Return a string representation of the discount's type and value."""
+        return f"Discount Type: {self.__discount_type}, Value: {self.__value}"
+
+class Order:
+    """A class that identifies an Order with an order ID, a cart, total amount, and discounts."""
+
+    def __init__(self, orderID: str, customer: Customer):
+        self.__orderID = orderID         # Private attribute for the unique order ID
+        self._cart = Cart(orderID)       # Composition with Cart
+        self._totalAmount = 0.0          # Protected attribute for the total amount of the order
+        self._orderDate = date.today()   # Order date
+        self._discount = None             # Single Discount instance for the order
+        # Association with Discount: An Order can have one associated Discount instance.
+
+    def set_discount(self, discount: Discount):
+        """Set the discount for the order."""
+        self._discount = discount
+
+    def calculate_total(self):
+        total = self._cart.get_total_price()
+
+        # Apply the discount if available
+        if self._discount is not None:
+            total = self._discount.apply_discount(total)
+
+        total *= 1.08  # 8% VAT
+        return total
+
+    def get_orderID(self):
+        return self.__orderID
+
+    def get_total_amount(self):
+        return self._totalAmount
+
+    def __str__(self):
+        return (f"Order ID: {self.__orderID}, Cart: [{self._cart}], "
+                f"Total Amount: {self._totalAmount}, Order Date: {self._orderDate}, "
+                f"Discount: {self._discount}")
+
+
+class Invoice(Order):  # Inheritance: Invoice inherits from Order
+    """A class that represents an Invoice, inheriting from Order and adding invoice-specific information."""
+
+    def __init__(self, orderID: str, customer: Customer, invoiceID: str):
+        super().__init__(orderID, customer)  # Call the parent class's __init__
+        self.__invoiceID = invoiceID         # Private attribute for the unique invoice ID
+        self.__invoiceDate = date.today()    # Invoice date
+        self.__totalAmount = self.calculate_total()  # Total amount after discounts
+
+    # Getter for invoiceID
+    def get_invoiceID(self):
+        return self.__invoiceID
+
+    # Getter for invoice date
+    def get_invoice_date(self):
+        return self.__invoiceDate
+
+    # Getter for total amount
+    def get_total_amount(self):
+        return self.__totalAmount
+
+    def __str__(self):
+        return (f"Invoice ID: {self.__invoiceID}, Order ID: {self.get_orderID()}, "
+                f"Customer: {self._cart.get_items()}, Total Amount: {self.__totalAmount}, "
+                f"Invoice Date: {self.__invoiceDate}")
+
+
+class SoftwareApplication:
+    """A class that represents a Software Application for managing eBooks and user accounts."""
+
+    def __init__(self, app_name: str):
+        self.app_name = app_name  # Name of the application
+        self.customers = []        # List of customers
+        self.ebooks = []           # Aggregation with eBooks (eBooks are managed by the application)
+        self.orders = []           # List of orders made through the application
+
+    def add_customer(self, customer: Customer):
+        """Add a new customer to the application."""
+        self.customers.append(customer)
+
+    def add_ebook(self, ebook: EBook):
+        """Add a new eBook to the application."""
+        self.ebooks.append(ebook)
+
+    def create_order(self, customer: Customer) -> Order:
+        """Create a new order for the specified customer."""
+        order = Order(orderID=str(len(self.orders) + 1), customer=customer)  # Generate a new order ID
+        self.orders.append(order)
+        return order
+
+    def __str__(self):
+        return (f"Software Application: {self.app_name}, "
+                f"Customers: {len(self.customers)}, EBooks: {len(self.ebooks)}, Orders: {len(self.orders)}")
